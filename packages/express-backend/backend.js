@@ -87,8 +87,9 @@ app.post("/users", (req, res) => {
   const randomId = Math.random();
   userToAdd.id = randomId;
 
-  addUser(userToAdd);
-  res.status(201).json(newUser);
+  users["users_list"].push(userToAdd);
+  
+  res.status(201).json(userToAdd);
 });
 
 app.delete("/users/:id", (req, res) => {

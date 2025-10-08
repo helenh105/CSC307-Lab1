@@ -37,15 +37,16 @@ function MyApp() {
   }
 
   function postUser(person) {
-    const promise = fetch("http://localhost:8076/users", {
+    //const promise =
+    return fetch("http://localhost:8076/users", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(person),
     });
 
-    return promise;
+    //return promise;
   }
 
   function updateList(person) {

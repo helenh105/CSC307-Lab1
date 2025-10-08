@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-const port = 8031;
+const port = 8076;
 
 const users = {
   users_list: [
@@ -50,7 +50,9 @@ const addUser = (user) => {
 };
 
 const deleteUserById = (id) => {
-    return users["users_list"].filter((user) => user["id"] != id)
+    const originalLength = users["users_list"].length;
+    users["users_list"] = users["users_list"].filter((user) => String(user["id"]) !== String(id));
+    return users["users_list"].length < originalLength;
 };
 
 const findUserByNameAndJob = (name, job) => {
@@ -81,8 +83,23 @@ app.get("/users", (req, res) => {
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
+
+  const randomId = Math.random();
+  userToAdd.id = randomId;
+
   addUser(userToAdd);
-  res.status(201).send();
+  res.status(201).json(newUser);
+});
+
+app.delete("/users/:id", (req, res) => {
+  const id = req.params.id;
+  const deleted = deleteUserById(id);
+
+  if(deleted) {
+    res.status(204).send();
+  } else {
+    res.status(404).send({ message: "User not found"});
+  }
 });
 
 app.listen(port, () => {

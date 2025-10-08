@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-const port = 5173;
+const port = 8031;
 
 const users = {
   users_list: [
@@ -67,7 +67,7 @@ app.get("/users", (req, res) => {
     const job = req.query.job;
     let result;
 
-    if (name != undefined & job != undefined){
+    if (name != undefined && job != undefined){
         let result = findUserByNameAndJob(name, job);
         result = { users_list: result};
         res.send(result);
@@ -82,7 +82,7 @@ app.get("/users", (req, res) => {
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
   addUser(userToAdd);
-  res.send();
+  res.status(201).send();
 });
 
 app.listen(port, () => {

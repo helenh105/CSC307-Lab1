@@ -2,105 +2,76 @@
 import express from "express";
 import cors from "cors";
 
+import {
+  getUsers,
+  findUserById,
+  addUser,
+  findUserByNameAndJob,
+  deleteUserById
+} from "./services/user-services.js";
+
 const app = express();
 const port = 8076;
-
-const users = {
-  users_list: [
-    {
-      id: "xyz789",
-      name: "Charlie",
-      job: "Janitor"
-    },
-    {
-      id: "abc123",
-      name: "Mac",
-      job: "Bouncer"
-    },
-    {
-      id: "ppp222",
-      name: "Mac",
-      job: "Professor"
-    },
-    {
-      id: "yat999",
-      name: "Dee",
-      job: "Aspring actress"
-    },
-    {
-      id: "zap555",
-      name: "Dennis",
-      job: "Bartender"
-    }
-  ]
-};
-
-const findUserByName = (name) => {
-  return users["users_list"].filter(
-    (user) => user["name"] === name
-  );
-};
-
-const findUserById = (id) =>
-  users["users_list"].find((user) => user["id"] === id);
-
-const addUser = (user) => {
-  users["users_list"].push(user);
-  return user;
-};
-
-const deleteUserById = (id) => {
-    const originalLength = users["users_list"].length;
-    users["users_list"] = users["users_list"].filter((user) => String(user["id"]) !== String(id));
-    return users["users_list"].length < originalLength;
-};
-
-const findUserByNameAndJob = (name, job) => {
-    return users["users_list"].filter(
-        (user) => user["name"] == name && user["job"] == job
-    );
-};
 
 app.use(cors());
 app.use(express.json());
 
-app.get("/users", (req, res) => {
-    const name = req.query.name;
-    const job = req.query.job;
-    let result;
+app.get("/", (req, res) =>
+ {
+    res.send("Hello World!");
+ })
 
-    if (name != undefined && job != undefined){
-        let result = findUserByNameAndJob(name, job);
-        result = { users_list: result};
-        res.send(result);
-    } else if (name != undefined){
-        result = findUserByName(name);
+app.get("/users", (req, res) => {
+    const { name, job } = req.query;
+    let query; 
+
+    if (name && job) {
+      query = findUserByNameAndJob(name, job);
     } else {
-        result = users["users_list"];
+      query = getUsers(name, job);
     }
-    res.send(users);
+
+    query
+      .then((users) => res.send({ users_list: users}))
+      .catch((err) => res.status(500).send(err.message));
+    
+});
+
+// GET /users/:id fetching the user by mongoDB id
+app.get("/users/:id", (req, res) => {
+  const id = req.params["id"];
+
+  findUserById(id)
+    .then(user => {
+      if (result === null) {
+        res.status(404).send("Resource not found.");
+      } else {
+        res.send(result);
+      }
+    })
+    .catch(err => res.status(500).json(err.message));
 });
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
 
-  const randomId = Math.random();
-  userToAdd.id = randomId;
-
-  users["users_list"].push(userToAdd);
-  
-  res.status(201).json(userToAdd);
+  addUser(userToAdd)
+    .then((newUser) => res.status(201).json(newUser))
+    .catch((err) => res.status(400).send(err.message));
 });
 
 app.delete("/users/:id", (req, res) => {
   const id = req.params.id;
-  const deleted = deleteUserById(id);
 
-  if(deleted) {
-    res.status(204).send();
-  } else {
-    res.status(404).send({ message: "User not found"});
-  }
+  deleteUserById(id)
+    .then((deleted) => {
+      if (deleted) {
+        res.status(204).send();
+      } else {
+        res.status(404).send("Resource not found.");
+      }
+    })
+    .catch((err) => res.status(500).send(err.message));
 });
 
 app.listen(port, () => {

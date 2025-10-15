@@ -6,15 +6,15 @@ import Form from "./Form";
 function MyApp() {
   const [characters, setCharacters] = useState([]);
 
-  function removeOneCharacter(index) {
-    const userToDelete = characters[index];
+  function removeOneCharacter(userId) {
+    //const userToDelete = characters[index];
 
-    fetch(`http://localhost:8076/users/${userToDelete.id}`, {
+    fetch(`http://localhost:8076/users/${userId}`, {
       method: "DELETE",
     })
       .then((response) => {
         if (response.status === 204) {
-          const updated = characters.filter((character, i) => i !== index);
+          const updated = characters.filter((user) => user._id !== userId);
           setCharacters(updated);
         } else if (response.status === 404) {
           console.log("User not found on backend");
@@ -75,9 +75,9 @@ function MyApp() {
   return (
     <div className="container">
       <Table 
-	characterData={characters}
-	removeCharacter={removeOneCharacter}
-	/>
+	      characterData={characters}
+	      removeCharacter={removeOneCharacter}
+	    />
       <Form handleSubmit={updateList}/>
     </div>
   );
